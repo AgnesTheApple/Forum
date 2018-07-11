@@ -1,72 +1,74 @@
 <?php
-require('../php/config.php'); /* Contient la connexion à la $bdd */
+session_start();
 
-if(isset($_POST['forminscription']))
-{
-	$pseudo = htmlspecialchars($_POST['pseudo']);
-	$mail = htmlspecialchars($_POST['mail']);
-	$mail2 = htmlspecialchars($_POST['mail2']);
-	$mdp = ($_POST['mdp']);//"sha1" et fait pour couper et proteger le mot de passe
-	$mdp2 = ($_POST['mdp2']);
-	
-	if(!empty($_POST['pseudo'])AND isset($_POST['mail'])AND !empty($_POST['mail2'])AND !empty($_POST['mdp'])AND !empty($_POST['mdp2']))
-	{		
-		$pseudolength = strlen($pseudo);//"strlen" est la pour verifier si la taille du pseudo et bon donc
-		if($pseudolength <= 255) // si le pseudo est < ou = a 255 et 
-		{
-			if($mail == $mail2)// si le mail de Confirmation et égal au mail de base alors il
-			{
-				if(filter_var($mail, FILTER_VALIDATE_EMAIL))// verifi si le mail est vraiment un mail et  
-				{
-					$reqmail = $bdd->prepare("SELECT * FROM membres WHERE mail = ?");
-					$reqmail->execute(array($mail));//la fonction execute
-					$mailexist = $reqmail->rowCount();//rowCount sert a compter le mbr de colonne qui y a dans la bdd
-					if($mailexist == 0)
-					{
-						//$mdp = password_hash($mdp, PASSWORD_DEFAULT);
-						if($mdp == $mdp2)// si le mdp de Confirmation et égal au mdp de base alors
-						{
-							$insertmbr = $bdd->prepare('INSERT INTO membres(pseudo, mail, motdepasse) VALUES(?, ?, ?)');//requete pour preparer a executer la base de donné(bdd)avec...
-							$insertmbr->execute(array($pseudo, $mail, $mdp));//la fonction execute
-							header("Location: ../1-connexion_forum/connexion.php");
-						}
-						else // sinon une erreur s'affiche
-						{
-							$erreur = "Vos mot de passe ne corresponent pas !";
-						}
-					}
-					else // sinon une erreur s'affiche
-					{
-						$erreur = "Adresses mail déjé utiliséé !";
-					}
-				}
-				else // sinon une erreur s'affiche
-				{
-					$erreur = "vos adresses mail n'est pas valide !";
-				}
-			}
-			else // sinon une erreur s'affiche
-			{
-				$erreur = "vos adresses mail ne corresponent pas !";
-			}
-		}
-		else // sinon une erreur s'affiche
-		{
-			$erreur = "votre pseudo ne doit pas dépasser 255 caractères.";
-		}
+require('../php/config.php');
+
+if(isset($_SESSION['id'])) {
+   $requser = $bdd->prepare("SELECT * FROM membres WHERE id = ?");
+   $requser->execute(array($_SESSION['id']));
+   $user = $requser->fetch();
+   
+   if(isset($_POST['newpseudo']) AND !empty($_POST['newpseudo']) AND $_POST['newpseudo'] != $user['pseudo']) {
+      $newpseudo = htmlspecialchars($_POST['newpseudo']);
+      $insertpseudo = $bdd->prepare("UPDATE membres SET pseudo = ? WHERE id = ?");
+      $insertpseudo->execute(array($newpseudo, $_SESSION['id']));
+      header('Location: profil.php?id='.$_SESSION['id']);
+   }
+   
+   if(isset($_POST['newmail']) AND !empty($_POST['newmail']) AND $_POST['newmail'] != $user['mail']) {
+      $newmail = htmlspecialchars($_POST['newmail']);
+      $insertmail = $bdd->prepare("UPDATE membres SET mail = ? WHERE id = ?");
+      $insertmail->execute(array($newmail, $_SESSION['id']));
+      header('Location: profil.php?id='.$_SESSION['id']);
+   }
+   
+   if(isset($_POST['newmdp1']) AND !empty($_POST['newmdp1']) AND isset($_POST['newmdp2']) AND !empty($_POST['newmdp2'])) {
+      $mdp1 = sha1($_POST['newmdp1']);
+      $mdp2 = sha1($_POST['newmdp2']);
+      if($mdp1 == $mdp2) {
+         $insertmdp = $bdd->prepare("UPDATE membres SET motdepasse = ? WHERE id = ?");
+         $insertmdp->execute(array($mdp1, $_SESSION['id']));
+         header('Location: profil.php?id='.$_SESSION['id']);
+      } else {
+        $error404 = "Vos mot de passe ne corresponent pas !";
+      }
 	}
-	else
-	{
-		$erreur ="Tous les champ doivent être complétés !";
+	if(isset($_FILES['avatar']) AND !empty($_FILES['avatar']['name'])) {
+	   $tailleMax = 2097152;
+	   $extensionsValides = array('jpg', 'jpeg', 'gif', 'png');
+	   if($_FILES['avatar']['size'] <= $tailleMax) {
+		  $extensionUpload = strtolower(substr(strrchr($_FILES['avatar']['name'], '.'), 1));
+		  if(in_array($extensionUpload, $extensionsValides)) {
+			 $chemin = "membres/avatars/".$_SESSION['id'].".".$extensionUpload;
+			 $resultat = move_uploaded_file($_FILES['avatar']['tmp_name'], $chemin);
+			 if($resultat) {
+				$updateavatar = $bdd->prepare('UPDATE membres SET avatar = :avatar WHERE id = :id');
+				$updateavatar->execute(array(
+				   'avatar' => $_SESSION['id'].".".$extensionUpload,
+				   'id' => $_SESSION['id']
+				   ));
+				header('Location: profil.php?id='.$_SESSION['id']);
+			 } else {
+				$error404 = "Erreur durant l'importation de votre photo de profil";
+			 }
+		  } else {
+			 $error404 = "Votre photo n'est pas en format jpg, jpeg, gif ou png";
+		  }
+	   } else {
+		  $error404 = "Votre photo de profil ne doit pas dépasser 2Mo";
+	   }
 	}
 	
 }
+else {
+	header('Location: ../1-connexion_forum/connexion.php');
+ }
 ?>
 <html>
     <head>
 		<title>Inscription</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="icon" type="image/png" href="../images/icon.png">
+		<link rel="icon" type="image/png" href="images/icon.png">
 		<link rel="stylesheet" href="css/forum.css"> 
 		<style>
 		@font-face {
@@ -195,6 +197,17 @@ if(isset($_POST['forminscription']))
 			font-size:5em;
 
 		}
+		p.titre3{
+			margin-top:-3.5em;
+			margin-right:auto;
+			margin-left:8em;
+			width:auto;
+			height:auto;
+			color: white;
+			font-family: The Heart of Everything Demo;
+			font-size:2em;
+
+		}
 		div.inscription{
 			background: linear-gradient(to right, #555,  #444);
 			border-radius:10px;
@@ -207,7 +220,7 @@ if(isset($_POST['forminscription']))
 			opacity:0.96;
 		}
 		form.formu{
-			margin-top:-6em;
+			margin-top:-4.8em;
 			margin-right:auto;
 			margin-left:auto;
 			
@@ -224,28 +237,24 @@ if(isset($_POST['forminscription']))
 			background-color: rgb(40,40,40);
 			font-family: Arial, sans-serif;
 		}
+		label{
+			color: white;
+		}
+		input.texte2{
+			color: white;
+		}
 		hr{
 			color:black;
+			margin-top:0.1em;
 		}
 		div.error404{
-			margin-top:-1.6em;
+			margin-top:-1.7em;
 			margin-right:auto;
 			margin-left:auto;
 			width:auto;
 			height:1.9em;
 			border-radius:0px 0px 10px 10px;
 			color: red;
-			background-color: rgb(0,0,0);
-			font-family: Arial, sans-serif;
-		}
-		div.valide{
-			margin-top:-1.6em;
-			margin-right:auto;
-			margin-left:auto;
-			width:auto;
-			height:1.9em;
-			border-radius:0px 0px 10px 10px;
-			color: green;
 			background-color: rgb(0,0,0);
 			font-family: Arial, sans-serif;
 		}
@@ -309,76 +318,53 @@ if(isset($_POST['forminscription']))
 	<body >
 	<div id="barreClub">
 		<ul>
-			<li><A HREF="../accueil_forum.html"><p>ACCUEIL</p></A></li>
-			<li><A HREF="../2-forum/forum.php"><p>FORUM</p></A></li>
-			<li><A HREF="../1-connexion_forum/connexion.php"><p>SE CONNECTER</p></A></li>
-			<li><A HREF=""><p>S'INSCRIRE</p></A></li>
+			<li><A HREF="../accueil_connecte/accueil_forum.html"><p>ACCUEIL</p></A></li>
+			<li><A HREF="../2-forum_connecte/forum.php"><p>FORUM</p></A></li>
+			<li><A HREF="connexion_profil.php"><p>PROFIL</p></A></li>
 		</ul>
 	</div>
 	<p class="text" align="center">Le forum des passionnés de photo</p>
 	<p class="titre" align="center">FlashClub-</p>
 	<div class="inscription" align="center">
 	<img class="photo" src="../images/photo.png"/>
-		<h2 class="titre2">Inscription</h2>
+		<h2 class="titre2">Modifier</h2>
+		<p class="titre3">son profil</p>
 		<br/><br/>
 		<div class="col-12">
-			<form class="formu" method="POST" action="">
+            <form class="formu" method="POST" action="" enctype="multipart/form-data">
 				<table>
 					<tr>
-						<td align="right">
-							<label for="pseudo"></label>
-						</td>
 						<td>
-							<input class="texte" type="text" placeholder="Pseudo" id="pseudo" name="pseudo" value="<?php if(isset($pseudo)) { echo $pseudo; }?>" />
+						   <input class="texte" type="text" name="newpseudo" placeholder="Pseudo" value="<?php echo $user['pseudo']; ?>" /> 
 						</td>
 					</tr>
 					<tr>
-						<td align="right">
-							<label for="mail"></label>
-						</td>
 						<td>
-							<input class="texte" type="email" placeholder="Mail" id="mail" name="mail" value="<?php if(isset($mail)) { echo $mail; }?>" />
+						   <input class="texte" type="text" name="newmail" placeholder="Mail" value="<?php echo $user['mail']; ?>" />  
 						</td>
 					</tr>
 					<tr>
-						<td align="right">
-							<label for="mail2"></label>
-						</td>
 						<td>
-							<input class="texte" type="email" placeholder="Confirmez votre mail" id="mail2" name="mail2" value="<?php if(isset($mail2)) { echo $mail2; }?>" />
+						   <input class="texte" type="password" name="newmdp1" placeholder="Mot de passe"/> 
 						</td>
 					</tr>
 					<tr>
-						<td align="right">
-							<label for="mdp"></label>
-						</td>
 						<td>
-							<input class="texte" type="password" placeholder="Mot de passe" id="mdp" name="mdp"/>
-						</td>
-					</tr>
-					<tr>
-						<td align="right">
-							<label for="mdp2"></label>
-						</td>
-						<td>
-							<input class="texte" type="password" placeholder="Confirmez votre mot de passe" id="mdp2" name="mdp2"/>
+						   <input class="texte" type="password" name="newmdp2" placeholder="Confirmation du mot de passe" /> 
 						</td>
 					</tr>
 				</table>
+				<label>Rajouter une photo de profil</label>
+				<input class="texte2" type="file" name="avatar"/>
 				<hr/>
 				<br/>
-				<?php
-					if(isset($erreur))
-					{
-						echo '<div class="error404">'.$erreur."</div>";
-					}
-					if (isset($valide))
-					{
-						echo '<div class="valide">'.$valide."</div>";
-					}
-				?>	
-				<input class="inscrist" type="submit" name="forminscription" value="Je m'inscris"/><br/>
-			</form>
+				<?php if(isset($error404)) 
+				{ 
+				echo '<div class="error404">'.$error404."</div>"; 
+				} 
+				?>
+               <input class="inscrist" type="submit" value="Mettre à jour mon profil !" /><br/>
+            </form>
 		</div>
 	</div>
 	</body>

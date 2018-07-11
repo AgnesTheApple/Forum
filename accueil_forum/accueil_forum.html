@@ -4,7 +4,7 @@
 		<title>FlashClub-</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="icon" type="image/png" href="images/icon.png">
-		<link rel="stylesheet" href="css/forum.css"> 
+		<link rel="stylesheet" href="accueil_css/forum.css"> 
     </head>
 	<body >
 	
@@ -46,35 +46,24 @@
 					<img class="mySlides" src="images/diapo/fond (4).jpg">
 					<img class="mySlides" src="images/diapo/fond (5).jpg">
 					<img class="mySlides" src="images/diapo/fond (6).jpg">
-
-
-				</div>
-				<div class="bouton">
-					<button class="bouton1" onclick="plusDivs(-1)">&#10094;</button>
-				</div>
-				<div class="bouton2">
-					<button class="bouton3" onclick="plusDivs(1)">&#10095;</button>
 				</div>
 			</div>
-			<script>
-				var slideIndex = 1;
-				showDivs(slideIndex);
-
-				function plusDivs(n) {
-					showDivs(slideIndex += n);
-				}
-
-				function showDivs(n) {
-					var i;
-					var x = document.getElementsByClassName("mySlides");
-					if (n > x.length) {slideIndex = 1}    
-					if (n < 1) {slideIndex = x.length}
-					for (i = 0; i < x.length; i++) {
-						x[i].style.display = "none";  
-					}
-					x[slideIndex-1].style.display = "block";  
-				}
-			</script>
 		</div>
+		<script>
+			var myIndex = 0;
+			carousel();
+
+			function carousel() {
+				var i;
+				var x = document.getElementsByClassName("mySlides");
+				for (i = 0; i < x.length; i++) {
+				   x[i].style.display = "none";  
+				}
+				myIndex++;
+				if (myIndex > x.length) {myIndex = 1}    
+				x[myIndex-1].style.display = "block";  
+				setTimeout(carousel, 9000);    
+			}
+		</script>
 	</body>
 </html>

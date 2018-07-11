@@ -3,8 +3,8 @@
     <head>
 		<title>FlashClub-</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="icon" type="image/png" href="images/icon.png">
-		<link rel="stylesheet" href="css/forum.css"> 
+		<link rel="icon" type="image/png" href="../images/icon.png">
+		<link rel="stylesheet" href="../accueil_css/forum.css"> 
     </head>
 	<body >
 	
@@ -18,20 +18,21 @@
 			<div class="position_menu" align="center">
 				<ul>
 					<li><A HREF="../2-forum_connecte/forum.php"><p>FORUM</p></A></li>
+					<li class="menuS1" ><A HREF="../3-profil_membre/connexion_profil.php"><p>PROFIL</p></A></li>
 					<li><A HREF="../1-deconnexion_forum/deconnexion.php"><p>SE DECONNECTER</p></A></li>
 				</ul>
 			</div>
 			<div class="position2" align="center">
 				<div class="diap2S">
-					<A HREF="https://twitter.com/Rikami7"><img class="diap2" src="images/twi.png"/></A>
-					<A HREF="https://github.com/"><img class="diap2" src="images/git.png"/></A>
-					<A HREF="https://www.facebook.com/"><img class="diap2" src="images/fb2.png"/></A>
+					<A HREF="https://twitter.com/Rikami7"><img class="diap2" src="../images/twi.png"/></A>
+					<A HREF="https://github.com/"><img class="diap2" src="../images/git.png"/></A>
+					<A HREF="https://www.facebook.com/"><img class="diap2" src="../images/fb2.png"/></A>
 				</div>
 			</div>
 		</div>
 		<p class="titre" align="center">FlashClub-</p>
 		<div class="position1" align="center">
-			<img class="photo" src="images/photo.png"/>
+			<img class="photo" src="../images/photo.png"/>
 		</div>
 		<div class="position3" align="center">
 			<div class="bienvenue">
@@ -39,41 +40,30 @@
 			</div>
 			<div class="bienvenue2">
 				<div class="diapo">
-					<img class="mySlides" src="images/diapo/fond (1).jpg">
-					<img class="mySlides" src="images/diapo/fond (2).png">
-					<img class="mySlides" src="images/diapo/fond (3).jpg">
-					<img class="mySlides" src="images/diapo/fond (4).jpg">
-					<img class="mySlides" src="images/diapo/fond (5).jpg">
-					<img class="mySlides" src="images/diapo/fond (6).jpg">
-
-
-				</div>
-				<div class="bouton">
-					<button class="bouton1" onclick="plusDivs(-1)">&#10094;</button>
-				</div>
-				<div class="bouton2">
-					<button class="bouton3" onclick="plusDivs(1)">&#10095;</button>
+					<img class="mySlides" src="../images/diapo/fond (1).jpg">
+					<img class="mySlides" src="../images/diapo/fond (2).png">
+					<img class="mySlides" src="../images/diapo/fond (3).jpg">
+					<img class="mySlides" src="../images/diapo/fond (4).jpg">
+					<img class="mySlides" src="../images/diapo/fond (5).jpg">
+					<img class="mySlides" src="../images/diapo/fond (6).jpg">
 				</div>
 			</div>
-			<script>
-				var slideIndex = 1;
-				showDivs(slideIndex);
+		<script>
+			var myIndex = 0;
+			carousel();
 
-				function plusDivs(n) {
-					showDivs(slideIndex += n);
+			function carousel() {
+				var i;
+				var x = document.getElementsByClassName("mySlides");
+				for (i = 0; i < x.length; i++) {
+				   x[i].style.display = "none";  
 				}
-
-				function showDivs(n) {
-					var i;
-					var x = document.getElementsByClassName("mySlides");
-					if (n > x.length) {slideIndex = 1}    
-					if (n < 1) {slideIndex = x.length}
-					for (i = 0; i < x.length; i++) {
-						x[i].style.display = "none";  
-					}
-					x[slideIndex-1].style.display = "block";  
-				}
-			</script>
+				myIndex++;
+				if (myIndex > x.length) {myIndex = 1}    
+				x[myIndex-1].style.display = "block";  
+				setTimeout(carousel, 9000);    
+			}
+		</script>
 		</div>
 	</body>
 </html>

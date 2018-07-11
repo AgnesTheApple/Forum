@@ -1,6 +1,6 @@
 <?php
 session_start();
-$bdd = new PDO('mysql:host=127.0.0.1;dbname=espace_membre', 'root','root');
+require('../php/config.php'); /* Contient la connexion à la $bdd */
 if(isset($_POST['formconnexion'])){
 	$mailconnect = ($_POST['mailconnect']);
 	$mdpconnect = ($_POST['mdpconnect']);
@@ -30,7 +30,7 @@ if(isset($_POST['formconnexion'])){
     <head>
 		<title>Connexion</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="icon" type="image/png" href="images/icon.png">
+		<link rel="icon" type="image/png" href="../images/icon.png">
 		<link rel="stylesheet" href="css/forum.css"> 
 		<style>
 		@font-face {
@@ -38,7 +38,7 @@ if(isset($_POST['formconnexion'])){
 			src: url('../police/TheHeartof.ttf');
 		}
 		body{
-			background-image: url(images/fond2.jpg);
+			background-image: url(../images/fond2.jpg);
 			background-repeat:no-repeat;
 			background-position:absolute;
 			background-size: cover;
@@ -282,7 +282,7 @@ if(isset($_POST['formconnexion'])){
 	<p class="text" align="center">Le forum des passionnés de photo</p>
 	<p class="titre" align="center">FlashClub-</p>
 	<div class="inscription" align="center">
-	<img class="photo" src="images/photo.png"/>
+	<img class="photo" src="../images/photo.png"/>
 		<h2 class="titre2">Connexion</h2>
 		<br/><br/>
 		<div class="col-12">
@@ -314,9 +314,9 @@ if(isset($_POST['formconnexion'])){
 	<footer class="col-12">
 	<p class="copi">Copyright 2018 ©</p>
 		<div class="diap2S">
-			<A HREF="https://twitter.com/"><img class="diap2" src="images/twi.png"/></A>
-			<A HREF="https://github.com/"><img class="diap2" src="images/git.png"/></A>
-			<A HREF="https://www.facebook.com/"><img class="diap2" src="images/fb2.png"/></A>
+			<A HREF="https://twitter.com/"><img class="diap2" src="../images/twi.png"/></A>
+			<A HREF="https://github.com/"><img class="diap2" src="../images/git.png"/></A>
+			<A HREF="https://www.facebook.com/"><img class="diap2" src="../images/fb2.png"/></A>
 		</div>
 	</footer>
 </html>
